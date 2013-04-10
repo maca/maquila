@@ -7,3 +7,6 @@
 [submodule "test/lib/jasmine-reporters"]
 	path = test/lib/jasmine-reporters
 	url = git@github.com:larrymyers/jasmine-reporters.git
+[submodule "test/lib/phantom-jasmine"]
+	path = test/lib/phantom-jasmine
+	url = git@github.com:jcarver989/phantom-jasmine.git
