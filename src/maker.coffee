@@ -1,5 +1,3 @@
-# Este archivo será evenualmente vendoreado solamente para correr pruebas de
-# Jasmine.
 
 Maker =
   define: (name, model = Object) ->
