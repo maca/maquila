@@ -1,8 +1,8 @@
 
-Maker =
+Maquila =
   define: (name, model = Object) ->
     @factories or= {}
-    @factories[name] = new Maker.Factory(model)
+    @factories[name] = new Maquila.Factory(model)
 
   factory: (name) ->
     @factories or= {}
@@ -45,7 +45,7 @@ class Counter
   reset:     -> @sequence = @start
 
 
-class Maker.Factory
+class Maquila.Factory
   constructor: (@Constructor) ->
     @defaultAttrs = {}
     @setNewCounter()
@@ -84,7 +84,7 @@ class Maker.Factory
 
   extend: (name) ->
     defaults = {}
-    other    = Maker.factory(name)
+    other    = Maquila.factory(name)
     @counter = other.counter
 
     defaults[key] = val for key, val of other.defaultAttrs
@@ -95,4 +95,4 @@ class Maker.Factory
   incrementSequence: -> @counter.increment() and @
   resetSequence:     -> @counter.reset() and @
 
-if exports? then exports.Maker = Maker else @Maker = Maker
+if module?.exports then module.exports.Maquila = Maquila else @Maquila = Maquila

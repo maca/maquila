@@ -1,0 +1,20 @@
+{
+  "name": "maquila",
+  "version": "0.1.0",
+  "homepage": "http://github.com/maca/maquila",
+  "authors": [
+    "Macario Ortega"
+  ],
+  "description": "Factory lib for building JavaScript or creating records.",
+  "main": "dist/maquila.js",
+  "keywords": [
+    "factory",
+    "testing"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "node_modules",
+    "bower_components",
+    "spec"
+  ]
+}

@@ -1,6 +1,6 @@
-var Dummy, Maker, Post;
+var Dummy, Maquila, Post;
 
-Maker = window.Maker;
+Maquila = window.Maquila;
 
 Post = (function() {
   Post.create = function(attrs) {
@@ -33,22 +33,22 @@ Dummy = (function() {
 })();
 
 
-describe('Maker', function() {
+describe('Maquila', function() {
   afterEach(function() {
-    delete Maker.factories;
+    delete Maquila.factories;
   });
 
   it('defines a factory', function() {
     var factory;
 
-    factory = Maker.define('post', Post);
+    factory = Maquila.define('post', Post);
     expect(factory.Constructor).toBe(Post);
-    expect(Maker.factory('post')).toBe(factory);
+    expect(Maquila.factory('post')).toBe(factory);
   });
 
   it('raises error if factory is not defined', function() {
     expect(function () {
-      Maker.factory('user')
+      Maquila.factory('user')
     }).toThrow("factory 'user' is not defined")
   });
 
@@ -56,7 +56,7 @@ describe('Maker', function() {
     it('builds instance', function() {
       var factory, instance;
 
-      factory  = Maker.define('post', Post);
+      factory  = Maquila.define('post', Post);
       instance = factory.build();
 
       expect(instance).toEqual(new Post());
@@ -65,7 +65,7 @@ describe('Maker', function() {
     it('sets default attributes', function() {
       var factory, instance;
 
-      factory = Maker.define('post', Post).defaults({
+      factory = Maquila.define('post', Post).defaults({
         title: 'Post'
       });
 
@@ -78,7 +78,7 @@ describe('Maker', function() {
     it('returns attributes', function() {
       var attributes, factory;
 
-      factory = Maker.define('post', Post).defaults({
+      factory = Maquila.define('post', Post).defaults({
         title: 'Post'
       });
 
@@ -91,7 +91,7 @@ describe('Maker', function() {
     it('calls create on constructor if defined', function() {
       var factory, instance;
 
-      factory = Maker.define('post', Post).defaults({
+      factory = Maquila.define('post', Post).defaults({
         title: 'Post'
       });
 
@@ -105,7 +105,7 @@ describe('Maker', function() {
     it('instantiates on create if create is not defined for constructor', function() {
       var build, factory, instance;
 
-      factory  = Maker.define('dummy', Dummy);
+      factory  = Maquila.define('dummy', Dummy);
       instance = factory.create();
       build    = factory.build();
 
@@ -115,7 +115,7 @@ describe('Maker', function() {
     return it('defaults constructor to Object', function() {
       var factory, instance;
 
-      factory = Maker.define('post').defaults({
+      factory = Maquila.define('post').defaults({
         title: 'Post'
       });
 
@@ -128,7 +128,7 @@ describe('Maker', function() {
 
   describe('sequence', function() {
     beforeEach(function() {
-      Maker.define('post').defaults({
+      Maquila.define('post').defaults({
         title: function() {
           return "Post " + this.sequence();
         }
@@ -138,7 +138,7 @@ describe('Maker', function() {
     it('automatically increments sequence', function() {
       var attributes, factory;
 
-      factory    = Maker.factory('post');
+      factory    = Maquila.factory('post');
 
       attributes = factory.attributes();
       expect(attributes).toEqual({
@@ -154,7 +154,7 @@ describe('Maker', function() {
     it('manually increments sequence', function() {
       var attributes, factory, incrementResult;
 
-      factory    = Maker.factory('post');
+      factory    = Maquila.factory('post');
       attributes = factory.attributes();
 
       expect(attributes).toEqual({
@@ -173,7 +173,7 @@ describe('Maker', function() {
     it('resets sequence', function() {
       var attributes, factory, resetResult;
 
-      factory    = Maker.factory('post');
+      factory    = Maquila.factory('post');
 
       attributes = factory.attributes();
       expect(attributes).toEqual({
@@ -192,7 +192,7 @@ describe('Maker', function() {
     it('sets new counter', function() {
       var attributes, factory;
 
-      factory = Maker.factory('post').setNewCounter(4);
+      factory = Maquila.factory('post').setNewCounter(4);
       attributes = factory.attributes();
 
       expect(attributes).toEqual({
@@ -209,30 +209,30 @@ describe('Maker', function() {
     it('resets all sequences', function(){
       var attributes, resetResult;
 
-      Maker.define('user').defaults({
+      Maquila.define('user').defaults({
         name: function() { return "User " + this.sequence(); }
       });
 
-      attributes = Maker.factory('post').attributes();
+      attributes = Maquila.factory('post').attributes();
       expect(attributes).toEqual({
         title: "Post 1"
       });
 
-      attributes = Maker.factory('user').attributes();
+      attributes = Maquila.factory('user').attributes();
       expect(attributes).toEqual({
         name: "User 1"
       });
 
 
-      resetResult = Maker.resetSequences();
-      expect(resetResult).toBe(Maker);
+      resetResult = Maquila.resetSequences();
+      expect(resetResult).toBe(Maquila);
 
-      attributes = Maker.factory('post').attributes();
+      attributes = Maquila.factory('post').attributes();
       expect(attributes).toEqual({
         title: "Post 1"
       });
 
-      attributes = Maker.factory('user').attributes();
+      attributes = Maquila.factory('user').attributes();
       expect(attributes).toEqual({
         name: "User 1"
       });
@@ -243,7 +243,7 @@ describe('Maker', function() {
     it('overrides with new attributes', function() {
       var attributes, factory;
 
-      factory = Maker.define('post').defaults({
+      factory = Maquila.define('post').defaults({
         title: 'Post'
       });
 
@@ -260,7 +260,7 @@ describe('Maker', function() {
     it('overrides default attributes', function() {
       var attributes, factory;
 
-      factory = Maker.define('post').defaults({
+      factory = Maquila.define('post').defaults({
         title: 'Post',
         id: 31
       });
@@ -278,7 +278,7 @@ describe('Maker', function() {
     it('evaluates dynamic attribute', function() {
       var attributes, factory;
 
-      factory = Maker.define('post').defaults({
+      factory = Maquila.define('post').defaults({
         id: function() { return 62 / 2; }
       });
 
@@ -289,7 +289,7 @@ describe('Maker', function() {
     it('evaluates overriden dynamic attributes', function() {
       var attributes, factory;
 
-      factory = Maker.define('post').defaults({
+      factory = Maquila.define('post').defaults({
         title: 'Post',
         id: function() { return 32; }
       });
@@ -307,7 +307,7 @@ describe('Maker', function() {
     it('passes attributes to dynamic attribute function', function() {
       var attributes, factory;
 
-      factory = Maker.define('post').defaults({
+      factory = Maquila.define('post').defaults({
         title: 'Post 1',
         content: function(attrs) {
           return "Content for " + attrs.title;
@@ -325,7 +325,7 @@ describe('Maker', function() {
     it('evaluates dynamic attributes in the context of the factory', function() {
       var attributes, factory;
 
-      factory = Maker.define('something').defaults({
+      factory = Maquila.define('something').defaults({
         factory: function() {
           return this;
         }
@@ -340,11 +340,11 @@ describe('Maker', function() {
     it('builds instance', function() {
       var instance;
 
-      Maker.define('post', Post).defaults({
+      Maquila.define('post', Post).defaults({
         title: 'Post'
       });
 
-      instance = Maker.build('post');
+      instance = Maquila.build('post');
       expect(instance).toEqual(new Post({
         title: 'Post'
       }));
@@ -353,11 +353,11 @@ describe('Maker', function() {
     it('returns attributes', function() {
       var attributes;
 
-      Maker.define('post', Post).defaults({
+      Maquila.define('post', Post).defaults({
         title: 'Post'
       });
 
-      attributes = Maker.attributes('post');
+      attributes = Maquila.attributes('post');
 
       return expect(attributes).toEqual({
         title: 'Post'
@@ -367,11 +367,11 @@ describe('Maker', function() {
     it('creates instance', function() {
       var instance;
 
-      Maker.define('post', Post).defaults({
+      Maquila.define('post', Post).defaults({
         title: 'Post'
       });
 
-      instance = Maker.create('post');
+      instance = Maquila.create('post');
       expect(instance).toEqual(new Post({
         title: 'Post',
         persisted: true
@@ -381,11 +381,11 @@ describe('Maker', function() {
     it('builds instance overriding', function() {
       var instance;
 
-      Maker.define('post', Post).defaults({
+      Maquila.define('post', Post).defaults({
         title: 'Post'
       });
 
-      instance = Maker.build('post', {id: 1});
+      instance = Maquila.build('post', {id: 1});
 
       expect(instance).toEqual(new Post({
         title: 'Post',
@@ -396,11 +396,11 @@ describe('Maker', function() {
     it('returns attributes overriding', function() {
       var attributes;
 
-      Maker.define('post', Post).defaults({
+      Maquila.define('post', Post).defaults({
         title: 'Post'
       });
 
-      attributes = Maker.attributes('post', {
+      attributes = Maquila.attributes('post', {
         id: 1
       });
 
@@ -413,11 +413,11 @@ describe('Maker', function() {
     it('creates instance overriding', function() {
       var instance;
 
-      Maker.define('post', Post).defaults({
+      Maquila.define('post', Post).defaults({
         title: 'Post'
       });
 
-      instance = Maker.create('post', {
+      instance = Maquila.create('post', {
         id: 1
       });
 
@@ -431,7 +431,7 @@ describe('Maker', function() {
 
   describe('collections', function() {
     beforeEach(function() {
-      Maker.define('post', Post).defaults({
+      Maquila.define('post', Post).defaults({
         title: function() {
           return "Post " + (this.sequence());
         }
@@ -441,7 +441,7 @@ describe('Maker', function() {
     it('builds collection', function() {
       var collection;
 
-      collection = Maker.factory('post').arrayOf(3).build();
+      collection = Maquila.factory('post').arrayOf(3).build();
       expect(collection).toEqual([
         new Post({ title: 'Post 1' }),
         new Post({ title: 'Post 2' }),
@@ -452,7 +452,7 @@ describe('Maker', function() {
     it('returns attribute collection', function() {
       var collection;
 
-      collection = Maker.factory('post').arrayOf(3).attributes();
+      collection = Maquila.factory('post').arrayOf(3).attributes();
 
       expect(collection).toEqual([
         { title: 'Post 1' },
@@ -464,7 +464,7 @@ describe('Maker', function() {
     it('creates collection', function() {
       var collection;
 
-      collection = Maker.factory('post').arrayOf(3).create();
+      collection = Maquila.factory('post').arrayOf(3).create();
 
       expect(collection).toEqual([
         new Post({
@@ -485,7 +485,7 @@ describe('Maker', function() {
     it('build attributes overriding', function() {
       var collection;
 
-      collection = Maker.factory('post').arrayOf(3).build({
+      collection = Maquila.factory('post').arrayOf(3).build({
         title: function() {
           return "Post " + (this.sequence() * 2);
         }
@@ -507,7 +507,7 @@ describe('Maker', function() {
     it('attributes overriding', function() {
       var collection;
 
-      collection = Maker.factory('post').arrayOf(3).attributes({
+      collection = Maquila.factory('post').arrayOf(3).attributes({
         title: function() {
           return "Post " + (this.sequence() * 2);
         }
@@ -523,7 +523,7 @@ describe('Maker', function() {
     it('create attributes overriding', function() {
       var collection;
 
-      collection = Maker.factory('post').arrayOf(3).create({
+      collection = Maquila.factory('post').arrayOf(3).create({
         title: function() {
           return "Post " + (this.sequence() * 2);
         }
@@ -548,13 +548,13 @@ describe('Maker', function() {
 
   describe('extending', function() {
     beforeEach(function() {
-      Maker.define('post').defaults({
+      Maquila.define('post').defaults({
         title: function() {
           return "Post " + (this.sequence());
         }
       });
 
-      Maker.define('post-with-author').extend('post').defaults({
+      Maquila.define('post-with-author').extend('post').defaults({
         author: 'Macario'
       });
     });
@@ -562,8 +562,8 @@ describe('Maker', function() {
     it('shares a counter', function() {
       var extended, original;
 
-      original = Maker.factory('post');
-      extended = Maker.factory('post-with-author');
+      original = Maquila.factory('post');
+      extended = Maquila.factory('post-with-author');
 
       expect(original.counter).toBe(extended.counter);
     });
@@ -571,8 +571,8 @@ describe('Maker', function() {
     it('extends attributes', function() {
       var extended, original;
 
-      original = Maker.factory('post');
-      extended = Maker.factory('post-with-author');
+      original = Maquila.factory('post');
+      extended = Maquila.factory('post-with-author');
 
       expect(original.build()).toEqual(new Post({
         title: 'Post 1'

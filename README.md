@@ -1,6 +1,5 @@
-# Maker
+# Maquila
 
-Maker is yet another
 [factory_girl](https://github.com/thoughtbot/factory_girl) inspired
 library for building JavaScript objects or creating records, useful for
 setting up test data.
@@ -10,7 +9,7 @@ setting up test data.
 You can define a new factory with optional constructor function and
 default attributes, functions will be evaluated:
 
-      Maker.define('post', Post).defaults({
+      Maquila.define('post', Post).defaults({
         title : function() {
           return "Post " + this.sequence();
         },
@@ -23,7 +22,7 @@ default attributes, functions will be evaluated:
 
 Instantiate an object optionally passing attributes to override:
 
-      var post = Maker.build('post', { author: "Daffy Duck" });
+      var post = Maquila.build('post', { author: "Daffy Duck" });
 
 
 It will return a Post instance with this attributes:
@@ -39,48 +38,48 @@ It will return a Post instance with this attributes:
 Use create for doing an actual creation of records while using
 frameworks such as Spine.js or Backbone.js:
 
-      var persistedPost = Maker.create('post', { author: "Daffy Duck" });
+      var persistedPost = Maquila.create('post', { author: "Daffy Duck" });
 
 
 Or return a plain JavaScript attributes object:
 
-      var postAttributes = Maker.attributes('post', { author: "Daffy Duck" });
+      var postAttributes = Maquila.attributes('post', { author: "Daffy Duck" });
 
 
 You can reset the sequence counter for a given factory:
 
-      > Maker.build('post').title;
+      > Maquila.build('post').title;
       // => "Post 1"
-      > Maker.build('post').title;
+      > Maquila.build('post').title;
       // => "Post 2"
-      > Maker.factory('post').resetSequence();
+      > Maquila.factory('post').resetSequence();
       // => Factory
-      > Maker.build('post').title;
+      > Maquila.build('post').title;
       // => "Post 1"
 
 
 Or for all factories:
 
-    Maker.resetSequences();
+    Maquila.resetSequences();
 
 
 You can build an array of instances or attributes, optionally
 overriding defaults:
 
-    var posts = Maker.factory('post').arrayOf(3).build({
+    var posts = Maquila.factory('post').arrayOf(3).build({
       createdAt : function() { var today = new Date();
         return new Date(today.getTime() - 24 * 60 * 60 * 1000);
       }
     };
 
-    var persistedPosts = Maker.factory('post').arrayOf(3).create();
+    var persistedPosts = Maquila.factory('post').arrayOf(3).create();
 
-    var attributes = Maker.factory('post').arrayOf(3).attributes();
+    var attributes = Maquila.factory('post').arrayOf(3).attributes();
 
 
 You can define a factory based on a previous factory definition:
 
-      Maker.define('published-post').extend('post').defaults({
+      Maquila.define('published-post').extend('post').defaults({
         published: true
       });
 
@@ -88,5 +87,5 @@ You can define a factory based on a previous factory definition:
 Extended factories will share a sequence counter,
 but you can set a new one passing an optional start number:
 
-      Maker.factory('published-post').setNewCounter(2);
+      Maquila.factory('published-post').setNewCounter(2);
 
