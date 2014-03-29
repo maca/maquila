@@ -3,21 +3,42 @@
 // author: Macario Ortega
 // license: MIT
 (function() {
-  var Collection, Counter, Maquila;
+  var Collection, Counter, Maquila, currier;
+
+  currier = function(fn) {
+    var args;
+    args = Array.prototype.slice.call(arguments, 1);
+    return function() {
+      return fn.apply(this, args.concat(Array.prototype.slice.call(arguments, 0)));
+    };
+  };
 
   Maquila = {
     define: function(name, model) {
       if (model == null) {
         model = Object;
       }
-      this.factories || (this.factories = {});
-      return this.factories[name] = new Maquila.Factory(model);
+      if (this.factories == null) {
+        this.factories = {};
+      }
+      return this.factories[name] = new this.Factory(model, this.strategies);
     },
     factory: function(name) {
-      this.factories || (this.factories = {});
+      if (this.factories == null) {
+        this.factories = {};
+      }
       return this.factories[name] || (function() {
         throw "factory '" + name + "' is not defined";
       })();
+    },
+    resetSequences: function() {
+      var factory, key, _ref;
+      _ref = this.factories;
+      for (key in _ref) {
+        factory = _ref[key];
+        factory.resetSequence();
+      }
+      return this;
     },
     attributes: function(name, overrides) {
       return this.factory(name).attributes(overrides);
@@ -28,12 +49,21 @@
     create: function(name, overrides) {
       return this.factory(name).create(overrides);
     },
-    resetSequences: function() {
-      var factory, key, _ref;
+    strategies: {
+      build: function(Constructor, attributes) {
+        return new Constructor(attributes);
+      },
+      create: function(Constructor, attributes) {
+        return Constructor.create(attributes);
+      }
+    },
+    strategy: function(name, func) {
+      var factory, _ref;
+      this.strategies[name] = func;
       _ref = this.factories;
-      for (key in _ref) {
-        factory = _ref[key];
-        factory.resetSequence();
+      for (name in _ref) {
+        factory = _ref[name];
+        factory.refreshStrategies();
       }
       return this;
     }
@@ -41,8 +71,12 @@
 
   Collection = (function() {
     function Collection(factory, length) {
+      var name;
       this.factory = factory;
       this.length = length;
+      for (name in this.factory.strategies) {
+        this[name] = currier(this.executeStrategy, name);
+      }
     }
 
     Collection.prototype.attributes = function(overrides) {
@@ -54,20 +88,11 @@
       return _results;
     };
 
-    Collection.prototype.build = function(overrides) {
+    Collection.prototype.executeStrategy = function(name, overrides) {
       var num, _i, _ref, _results;
       _results = [];
       for (num = _i = 1, _ref = this.length; 1 <= _ref ? _i <= _ref : _i >= _ref; num = 1 <= _ref ? ++_i : --_i) {
-        _results.push(this.factory.build(overrides));
-      }
-      return _results;
-    };
-
-    Collection.prototype.create = function(overrides) {
-      var num, _i, _ref, _results;
-      _results = [];
-      for (num = _i = 1, _ref = this.length; 1 <= _ref ? _i <= _ref : _i >= _ref; num = 1 <= _ref ? ++_i : --_i) {
-        _results.push(this.factory.create(overrides));
+        _results.push(this.factory[name](overrides));
       }
       return _results;
     };
@@ -78,7 +103,7 @@
 
   Counter = (function() {
     function Counter(start) {
-      this.start = start || 1;
+      this.start = start != null ? start : 1;
       this.sequence = this.start;
     }
 
@@ -95,9 +120,11 @@
   })();
 
   Maquila.Factory = (function() {
-    function Factory(Constructor) {
+    function Factory(Constructor, strategies) {
       this.Constructor = Constructor;
       this.defaultAttrs = {};
+      this.strategies = Object.create(strategies);
+      this.refreshStrategies();
       this.setNewCounter();
     }
 
@@ -141,34 +168,36 @@
       return attrs;
     };
 
-    Factory.prototype.build = function(overrides) {
-      return new this.Constructor(this.attributes(overrides));
+    Factory.prototype.strategy = function(name, func) {
+      this.strategies[name] = func;
+      this.refreshStrategies();
+      return this;
     };
 
-    Factory.prototype.create = function(overrides) {
-      if (typeof this.Constructor.create === 'function') {
-        return this.Constructor.create(this.attributes(overrides));
-      } else {
-        return this.build(overrides);
+    Factory.prototype.executeStrategy = function(name, overrides) {
+      return this.strategies[name](this.Constructor, this.attributes(overrides));
+    };
+
+    Factory.prototype.refreshStrategies = function() {
+      var name;
+      for (name in this.strategies) {
+        this[name] = currier(this.executeStrategy, name);
       }
+      return this;
+    };
+
+    Factory.prototype.extend = function(name) {
+      var other;
+      other = Maquila.factory(name);
+      this.counter = other.counter;
+      this.strategies = Object.create(other.strategies);
+      this.defaults(other.defaultAttrs);
+      this.refreshStrategies();
+      return this;
     };
 
     Factory.prototype.arrayOf = function(num) {
       return new Collection(this, num);
-    };
-
-    Factory.prototype.extend = function(name) {
-      var defaults, key, other, val, _ref;
-      defaults = {};
-      other = Maquila.factory(name);
-      this.counter = other.counter;
-      _ref = other.defaultAttrs;
-      for (key in _ref) {
-        val = _ref[key];
-        defaults[key] = val;
-      }
-      this.defaults(defaults);
-      return this;
     };
 
     Factory.prototype.sequence = function() {

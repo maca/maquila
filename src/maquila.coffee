@@ -1,98 +1,109 @@
+currier = (fn) ->
+  args = Array::slice.call(arguments, 1)
+  -> fn.apply this, args.concat(Array::slice.call(arguments, 0))
+
 
 Maquila =
   define: (name, model = Object) ->
-    @factories or= {}
-    @factories[name] = new Maquila.Factory(model)
+    @factories ?= {}
+    @factories[name] = new @Factory(model, @strategies)
 
   factory: (name) ->
-    @factories or= {}
+    @factories ?= {}
     @factories[name] or throw("factory '#{name}' is not defined")
-
-  attributes: (name, overrides) ->
-    @factory(name).attributes(overrides)
-
-  build: (name, overrides) ->
-    @factory(name).build(overrides)
-
-  create: (name, overrides) ->
-    @factory(name).create(overrides)
 
   resetSequences: () ->
     for key, factory of @factories
       factory.resetSequence()
-    @
+    this
+
+  attributes: (name, overrides) ->
+    @factory(name).attributes(overrides)
+
+  build: (name, overrides)  -> @factory(name).build(overrides)
+  create: (name, overrides) -> @factory(name).create(overrides)
+
+  strategies:
+    build: (Constructor, attributes)  -> new Constructor attributes
+    create: (Constructor, attributes) -> Constructor.create attributes
+
+  strategy: (name, func) ->
+    @strategies[name] = func
+    for name, factory of @factories
+      factory.refreshStrategies()
+    this
 
 
 class Collection
   constructor: (@factory, @length) ->
+    for name of @factory.strategies
+      @[name] = currier(@executeStrategy, name)
 
   attributes: (overrides) ->
     @factory.attributes(overrides) for num in [1..@length]
 
-  build: (overrides) ->
-    @factory.build(overrides) for num in [1..@length]
-
-  create: (overrides) ->
-    @factory.create(overrides) for num in [1..@length]
+  executeStrategy: (name, overrides) ->
+    @factory[name](overrides) for num in [1..@length]
 
 
 class Counter
-  constructor: (start) ->
-    @start    = start or 1
-    @sequence = @start
-
+  constructor: (@start = 1) -> @sequence = @start
   increment: -> @sequence += 1
   reset:     -> @sequence = @start
 
 
 class Maquila.Factory
-  constructor: (@Constructor) ->
+  constructor: (@Constructor, strategies) ->
     @defaultAttrs = {}
+    @strategies   = Object.create(strategies)
+    @refreshStrategies()
     @setNewCounter()
 
   setNewCounter: (num = 1) ->
     @counter = new Counter(num)
-    @
+    this
 
   defaults: (attrs) ->
     @defaultAttrs[key] = val for key, val of attrs
-    @
+    this
 
   attributes: (overrides = {}) ->
     attrs = {}
-
     attrs[key] = val for key, val of @defaultAttrs
     attrs[key] = val for key, val of overrides
 
     for key, val of attrs
       attrs[key] =
-        if typeof val is 'function' then val.apply(@, [attrs]) else val
+        if typeof val is 'function' then val.apply(this, [attrs]) else val
 
     @incrementSequence()
     attrs
 
-  build: (overrides) ->
-    new @Constructor(@attributes(overrides))
+  strategy: (name, func) ->
+    @strategies[name] = func
+    @refreshStrategies()
+    this
 
-  create: (overrides) ->
-    if typeof @Constructor.create is 'function'
-      @Constructor.create(@attributes(overrides))
-    else
-      @build(overrides)
+  executeStrategy: (name, overrides) ->
+    @strategies[name]( @Constructor, @attributes(overrides) )
 
-  arrayOf: (num) -> new Collection(@, num)
+  refreshStrategies: ->
+    for name of @strategies
+      @[name] = currier(@executeStrategy, name)
+    this
 
   extend: (name) ->
-    defaults = {}
-    other    = Maquila.factory(name)
-    @counter = other.counter
+    other       = Maquila.factory(name)
+    @counter    = other.counter
+    @strategies = Object.create(other.strategies)
+    @defaults other.defaultAttrs
+    @refreshStrategies()
+    this
 
-    defaults[key] = val for key, val of other.defaultAttrs
-    @defaults(defaults)
-    @
-
+  arrayOf: (num) -> new Collection(this, num)
   sequence:          -> @counter.sequence
   incrementSequence: -> @counter.increment() and @
   resetSequence:     -> @counter.reset() and @
+
 
 if module?.exports then module.exports.Maquila = Maquila else @Maquila = Maquila

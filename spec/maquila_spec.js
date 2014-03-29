@@ -1,3 +1,5 @@
+// TODO: refactor specs
+
 var Dummy, Maquila, Post;
 
 Maquila = window.Maquila;
@@ -100,16 +102,6 @@ describe('Maquila', function() {
         title: 'Post',
         persisted: true
       }));
-    });
-
-    it('instantiates on create if create is not defined for constructor', function() {
-      var build, factory, instance;
-
-      factory  = Maquila.define('dummy', Dummy);
-      instance = factory.create();
-      build    = factory.build();
-
-      expect(instance).toEqual(build);
     });
 
     return it('defaults constructor to Object', function() {
@@ -582,6 +574,67 @@ describe('Maquila', function() {
         title: 'Post 2',
         author: 'Macario'
       }));
+    });
+
+    it('extends strategies', function() {
+      var extended, original;
+
+      original = Maquila.factory('post');
+      original.strategy('dummy', function(){});
+      extended = Maquila.factory('post-with-author').extend('post');
+      expect(original.strategies).toEqual(extended.strategies);
+      expect(extended.dummy).toBeDefined()
+    });
+  });
+
+  describe('strategies', function() {
+    var Post, factory, constructor, expectedAttrs;
+
+    beforeEach(function() {
+      Post = jasmine.createSpyObj('Post', ['create', 'persist'])
+
+      factory = Maquila.define('post', Post).defaults({
+        name: function(){ return "Post " + this.sequence(); },
+        author: 'Macario'
+      });
+
+      expectedAttrs = {
+        name: 'Post 1',
+        author: 'Macario',
+        when: 'now'
+      }
+    });
+
+    it('overrides factory strategy', function(){
+      factory.strategy('create', function(Constructor, attrs){
+        Constructor.persist(attrs);
+      });
+      factory.create({when: 'now'});
+      expect(Post.persist).toHaveBeenCalledWith(expectedAttrs);
+    });
+
+    it('defines factory strategy', function(){
+      factory.strategy('persist', function(Constructor, attrs){
+        Constructor.persist(attrs);
+      });
+      factory.persist({when: 'now'});
+      expect(Post.persist).toHaveBeenCalledWith(expectedAttrs);
+    });
+
+    it('overrides global strategy', function(){
+      Maquila.strategy('create', function(Constructor, attrs){
+        Constructor.persist(attrs);
+      });
+      factory.create({when: 'now'});
+      expect(Post.persist).toHaveBeenCalledWith(expectedAttrs);
+    });
+
+    it('defines global strategy', function(){
+      Maquila.strategy('persist', function(Constructor, attrs){
+        Constructor.persist(attrs);
+      });
+      factory.persist({when: 'now'});
+      expect(Post.persist).toHaveBeenCalledWith(expectedAttrs);
     });
   });
 });

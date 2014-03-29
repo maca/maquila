@@ -41,7 +41,7 @@ module.exports = (grunt) ->
 
     watch:
       all:
-        files: 'src/*.coffee'
+        files: ['src/*.coffee', 'spec/**/*.js']
         tasks: ['build', 'spec']
 
   grunt.loadNpmTasks 'grunt-contrib-coffee'
