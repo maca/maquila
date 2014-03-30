@@ -39,6 +39,11 @@ It will return a Post instance with this attributes.
         published: false
       })
 
+Same as:
+    
+    var post = Maquila.factory('post').build({ author: "Daffy Duck" });
+
+
 Or return a plain JavaScript computed attributes object:
 
       var postAttributes = Maquila.attributes('post', { author: "Daffy Duck" });
@@ -115,7 +120,8 @@ Collections will implement strategies defined globally or by factory.
 
 ### Extending Factories
 
-You can define a factory based on a previous factory definition.
+You can define a factory based on a previous factory definition,
+overriding some defaults.
 
       Maquila.define('published-post').extend('post').defaults({
         published: true
