@@ -219,7 +219,7 @@
   })();
 
   if (typeof module !== "undefined" && module !== null ? module.exports : void 0) {
-    module.exports.Maquila = Maquila;
+    module.exports = Maquila;
   } else {
     this.Maquila = Maquila;
   }

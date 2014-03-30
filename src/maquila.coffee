@@ -111,4 +111,4 @@ class Maquila.Factory
     @strategies[strategy]( @Constructor, @attributes(overrides) )
 
 
-if module?.exports then module.exports.Maquila = Maquila else @Maquila = Maquila
+if module?.exports then module.exports = Maquila else @Maquila = Maquila

@@ -6,13 +6,9 @@ setting up test data.
 
 ## Installation
 
-web
+web: `$ bower install maquila`
 
-  $ bower install maquila
-
-node
-
-  $ npm install maquila
+node: `$ npm install maquila`
 
 
 ## Usage
