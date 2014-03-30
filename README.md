@@ -4,6 +4,17 @@
 library for building JavaScript objects or creating records, useful for
 setting up test data.
 
+## Installation
+
+web
+
+  $ bower install maquila
+
+node
+
+  $ npm install maquila
+
+
 ## Usage
 
 ### Factory Definitions
