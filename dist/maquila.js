@@ -43,12 +43,6 @@
     attributes: function(name, overrides) {
       return this.factory(name).attributes(overrides);
     },
-    build: function(name, overrides) {
-      return this.factory(name).build(overrides);
-    },
-    create: function(name, overrides) {
-      return this.factory(name).create(overrides);
-    },
     strategies: {
       build: function(Constructor, attributes) {
         return new Constructor(attributes);
@@ -60,22 +54,30 @@
     strategy: function(name, func) {
       var factory, _ref;
       this.strategies[name] = func;
+      this[name] = currier(Maquila.execute, name);
       _ref = this.factories;
       for (name in _ref) {
         factory = _ref[name];
         factory.refreshStrategies();
       }
       return this;
+    },
+    execute: function(strategy, factory, overrides) {
+      return this.factory(factory)[strategy](overrides);
     }
   };
 
+  Maquila.build = currier(Maquila.execute, 'build');
+
+  Maquila.create = currier(Maquila.execute, 'create');
+
   Collection = (function() {
     function Collection(factory, length) {
-      var name;
+      var strategy;
       this.factory = factory;
       this.length = length;
-      for (name in this.factory.strategies) {
-        this[name] = currier(this.executeStrategy, name);
+      for (strategy in this.factory.strategies) {
+        this[strategy] = currier(this.execute, strategy);
       }
     }
 
@@ -88,11 +90,11 @@
       return _results;
     };
 
-    Collection.prototype.executeStrategy = function(name, overrides) {
+    Collection.prototype.execute = function(strategy, overrides) {
       var num, _i, _ref, _results;
       _results = [];
       for (num = _i = 1, _ref = this.length; 1 <= _ref ? _i <= _ref : _i >= _ref; num = 1 <= _ref ? ++_i : --_i) {
-        _results.push(this.factory[name](overrides));
+        _results.push(this.factory[strategy](overrides));
       }
       return _results;
     };
@@ -174,14 +176,10 @@
       return this;
     };
 
-    Factory.prototype.executeStrategy = function(name, overrides) {
-      return this.strategies[name](this.Constructor, this.attributes(overrides));
-    };
-
     Factory.prototype.refreshStrategies = function() {
       var name;
       for (name in this.strategies) {
-        this[name] = currier(this.executeStrategy, name);
+        this[name] = currier(this.execute, name);
       }
       return this;
     };
@@ -210,6 +208,10 @@
 
     Factory.prototype.resetSequence = function() {
       return this.counter.reset() && this;
+    };
+
+    Factory.prototype.execute = function(strategy, overrides) {
+      return this.strategies[strategy](this.Constructor, this.attributes(overrides));
     };
 
     return Factory;

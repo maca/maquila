@@ -636,5 +636,14 @@ describe('Maquila', function() {
       factory.persist({when: 'now'});
       expect(Post.persist).toHaveBeenCalledWith(expectedAttrs);
     });
+
+    it('defines the global method', function(){
+      Maquila.strategy('persist', function(Constructor, attrs){
+        Constructor.persist(attrs);
+      });
+
+      expect( Maquila.persist('post') ).
+        toEqual( Maquila.factory('post').persist() )
+    })
   });
 });

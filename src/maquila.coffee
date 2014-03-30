@@ -20,30 +20,34 @@ Maquila =
   attributes: (name, overrides) ->
     @factory(name).attributes(overrides)
 
-  build: (name, overrides)  -> @factory(name).build(overrides)
-  create: (name, overrides) -> @factory(name).create(overrides)
-
   strategies:
     build: (Constructor, attributes)  -> new Constructor attributes
     create: (Constructor, attributes) -> Constructor.create attributes
 
   strategy: (name, func) ->
     @strategies[name] = func
-    for name, factory of @factories
-      factory.refreshStrategies()
+    @[name] = currier(Maquila.execute, name)
+    factory.refreshStrategies() for name, factory of @factories
     this
+
+  # private
+  execute: (strategy, factory, overrides) ->
+    @factory(factory)[strategy](overrides)
+
+Maquila.build  = currier(Maquila.execute, 'build')
+Maquila.create = currier(Maquila.execute, 'create')
 
 
 class Collection
   constructor: (@factory, @length) ->
-    for name of @factory.strategies
-      @[name] = currier(@executeStrategy, name)
+    for strategy of @factory.strategies
+      @[strategy] = currier(@execute, strategy)
 
   attributes: (overrides) ->
     @factory.attributes(overrides) for num in [1..@length]
 
-  executeStrategy: (name, overrides) ->
-    @factory[name](overrides) for num in [1..@length]
+  execute: (strategy, overrides) ->
+    @factory[strategy](overrides) for num in [1..@length]
 
 
 class Counter
@@ -84,12 +88,9 @@ class Maquila.Factory
     @refreshStrategies()
     this
 
-  executeStrategy: (name, overrides) ->
-    @strategies[name]( @Constructor, @attributes(overrides) )
-
   refreshStrategies: ->
     for name of @strategies
-      @[name] = currier(@executeStrategy, name)
+      @[name] = currier(@execute, name)
     this
 
   extend: (name) ->
@@ -104,6 +105,10 @@ class Maquila.Factory
   sequence:          -> @counter.sequence
   incrementSequence: -> @counter.increment() and @
   resetSequence:     -> @counter.reset() and @
+
+  # private
+  execute: (strategy, overrides) ->
+    @strategies[strategy]( @Constructor, @attributes(overrides) )
 
 
 if module?.exports then module.exports.Maquila = Maquila else @Maquila = Maquila
