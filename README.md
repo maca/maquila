@@ -40,7 +40,7 @@ It will return a Post instance with this attributes.
       })
 
 Same as:
-    
+
     var post = Maquila.factory('post').build({ author: "Daffy Duck" });
 
 

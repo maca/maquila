@@ -4,7 +4,7 @@ module.exports = (grunt) ->
 
     meta:
       banner:
-        '// Maker.js\n' +
+        '// Maquila\n' +
         '// version: <%= pkg.version %>\n' +
         '// author: <%= pkg.author %>\n' +
         '// license: <%= pkg.licenses[0].type %>\n'

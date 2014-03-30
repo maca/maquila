@@ -1,7 +1,7 @@
 {
   "name": "maquila",
   "description": "Factory lib for building JavaScript or creating records.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Macario Ortega",
   "url": "http://github.com/maca/maquila",
   "main": "./dist/maquila.js",

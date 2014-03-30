@@ -1,5 +1,5 @@
-// Maker.js
-// version: 0.1.0
+// Maquila
+// version: 0.1.1
 // author: Macario Ortega
 // license: MIT
 (function() {
