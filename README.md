@@ -77,10 +77,11 @@ New strategies can be defined or existing ones overriden.
 
       var persistedPost = Maquila.persist('post', { author: "Daffy Duck" });
 
+In this case `Constructor` is `Post` constructor, since it was passed in the factory definition.
 Strategies can be define or overriden globaly or on a factory basis.
 
-      Maquila.factory('post').strategy('publish', function(Constructor, attrs){
-        return Constructor.publish(atts);
+      Maquila.factory('post').strategy('publish', function(Post, attrs){
+        return Post.publish(atts);
       });
 
       var publishedPost = Maquila.publish('post', { author: "Daffy Duck" });
@@ -133,9 +134,11 @@ overriding some defaults.
       Maquila.define('published-post').extend('post').defaults({
         published: true
       });
+      
+      > Maquila.build('published-post').published;
+      // => true
 
 Extended factories will share a sequence counter,
 but you can set a new one passing an optional start number.
 
       Maquila.factory('published-post').setNewCounter(2);
-
