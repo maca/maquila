@@ -77,7 +77,7 @@ New strategies can be defined or existing ones overriden.
 
       var persistedPost = Maquila.persist('post', { author: "Daffy Duck" });
 
-In this case `Constructor` is `Post` constructor, since it was passed in the factory definition.
+
 Strategies can be define or overriden globaly or on a factory basis.
 
       Maquila.factory('post').strategy('publish', function(Post, attrs){
